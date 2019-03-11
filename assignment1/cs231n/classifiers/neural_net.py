@@ -76,6 +76,17 @@ class TwoLayerNet(object):
     # Store the result in the scores variable, which should be an array of      #
     # shape (N, C).                                                             #
     #############################################################################
+    #fc layer1
+    layer1 = np.matmul(X, W1) + b1
+    layer1_relu = np.copy(layer1)
+    layer1_relu[layer1_relu<0] = 0
+    
+    #fc layer2
+    scores = np.matmul(layer1_relu, W2) + b2
+    #softmax
+    scores_exp = np.exp(scores)
+    exp_sum = np.sum(scores_exp, axis=1).reshape(-1,1)
+    posibilities = scores_exp / exp_sum
     pass
     #############################################################################
     #                              END OF YOUR CODE                             #
@@ -93,6 +104,10 @@ class TwoLayerNet(object):
     # in the variable loss, which should be a scalar. Use the Softmax           #
     # classifier loss.                                                          #
     #############################################################################
+    loss = np.sum(-np.log(posibilities[np.arange(N),y]))/N
+    loss += np.sum(np.power(W1, 2)) * reg
+    loss += np.sum(np.power(W2, 2)) * reg
+
     pass
     #############################################################################
     #                              END OF YOUR CODE                             #
@@ -105,6 +120,22 @@ class TwoLayerNet(object):
     # and biases. Store the results in the grads dictionary. For example,       #
     # grads['W1'] should store the gradient on W1, and be a matrix of same size #
     #############################################################################
+    binary_softmax = np.zeros_like(posibilities)
+    binary_softmax[np.arange(N), y] = 1
+    backprop_softmax = posibilities - binary_softmax
+    grads['b2'] = np.sum(backprop_softmax, axis=0) /N
+    grads['W2'] = np.matmul(layer1_relu.T, backprop_softmax) /N
+    grads['W2'] += 2 * reg * W2
+
+    backprop_layer2 = np.matmul(backprop_softmax, W2.T) #w2*relu
+    binary_relu = np.copy(layer1)
+    binary_relu[binary_relu > 0] = 1
+    binary_relu[binary_relu <= 0] = 0
+    backprop_relu = binary_relu * backprop_layer2
+    grads['b1'] = np.sum(backprop_relu, axis=0) /N
+    grads['W1'] = np.matmul(X.T, backprop_relu) /N
+    grads['W1'] += 2 * reg * W1
+
     pass
     #############################################################################
     #                              END OF YOUR CODE                             #
