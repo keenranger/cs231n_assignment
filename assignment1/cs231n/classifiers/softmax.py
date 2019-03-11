@@ -30,17 +30,30 @@ def softmax_loss_naive(W, X, y, reg):
   # here, it is easy to run into numeric instability. Don't forget the        #
   # regularization!                                                           #
   #############################################################################
+  N=y.shape[0]
+  #D=W.shape[0]
+  C=W.shape[1]
   
-  matrix_mul=np.matmul(X,W)
-  exp_term=np.exp(matrix_mul)
-  exp_sum=np.sum(exp_term, axis=1)
-  sum_reshape=np.reshape(exp_sum, (-1,1))#make 1xN into Nx1
-  
-  for i in np.arange(y.shape[0]):
-    loss+=(-np.log(exp_term[i][y[i]]/sum_reshape[i]))
-  loss/=y.shape[0]
-  reg_term=np.sum(np.power(W,2))
-  loss+=reg_term
+  global_loss=0
+  for i in np.arange(N):
+    local_numerator=0
+    local_denominator=0
+    for j in np.arange(C):#calculate denominator inside log
+      local_exp=np.exp(np.dot(X[i,:], W[:,j]))
+      local_denominator+=local_exp
+    for j in np.arange(C):
+      dW[:,j] += np.exp(np.dot(X[i,:], W[:,j])) * X[i,:] / local_denominator
+    
+    dW[:,y[i]] -= X[i,:] #gradient by numerator of log
+    local_numerator=np.exp(np.matmul(X[i,:],W[:,y[i]]))#calculate numerator inside log
+    
+    global_loss+=-np.log(local_numerator/local_denominator)#calculate loss for one sample
+
+  dW/=N
+  #regularization term
+  reg_term=np.sum(np.power(W,2)) * reg
+  loss += global_loss/N + reg_term
+  dW += 2 * reg * W
   pass
   #############################################################################
   #                          END OF YOUR CODE                                 #
@@ -65,7 +78,20 @@ def softmax_loss_vectorized(W, X, y, reg):
   # here, it is easy to run into numeric instability. Don't forget the        #
   # regularization!                                                           #
   #############################################################################
-  
+  N=y.shape[0]
+
+  XW=np.matmul(X, W)
+  exp_term=np.exp(XW)
+  exp_sum=np.sum(exp_term, axis=1)
+
+  loss = np.sum(-np.log(exp_term[np.arange(N),y]/ exp_sum))/N #loss term
+  loss += np.sum(np.power(W,2)) * reg #reg loss term
+
+  dW = np.matmul(X.T, exp_term/np.reshape(exp_sum, (-1,1)))/N
+  binary=np.zeros_like(exp_term)
+  binary[np.arange(N), y]=1
+  dW -= np.matmul(X.T, binary)/N
+  dW += 2 * reg * W #reg dW term
 
   pass
   #############################################################################
