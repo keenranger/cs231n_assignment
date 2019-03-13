@@ -180,6 +180,9 @@ class TwoLayerNet(object):
       # TODO: Create a random minibatch of training data and labels, storing  #
       # them in X_batch and y_batch respectively.                             #
       #########################################################################
+      indicies=np.random.choice(num_train, batch_size)
+      X_batch=X[indicies,:]
+      y_batch=y[indicies]
       pass
       #########################################################################
       #                             END OF YOUR CODE                          #
@@ -195,6 +198,12 @@ class TwoLayerNet(object):
       # using stochastic gradient descent. You'll need to use the gradients   #
       # stored in the grads dictionary defined above.                         #
       #########################################################################
+      self.params['W1'] -= learning_rate * grads['W1']
+      self.params['b1'] -= learning_rate * grads['b1']
+      self.params['W2'] -= learning_rate * grads['W2']
+      self.params['b2'] -= learning_rate * grads['b2']
+      
+
       pass
       #########################################################################
       #                             END OF YOUR CODE                          #
@@ -240,6 +249,17 @@ class TwoLayerNet(object):
     ###########################################################################
     # TODO: Implement this function; it should be VERY simple!                #
     ###########################################################################
+    W1, b1 = self.params['W1'], self.params['b1']
+    W2, b2 = self.params['W2'], self.params['b2']
+    layer1 = np.matmul(X, W1) + b1
+    layer1_relu = np.copy(layer1)
+    layer1_relu[layer1_relu<0] = 0
+
+    scores = np.matmul(layer1_relu, W2) + b2
+    scores_exp = np.exp(scores)
+    exp_sum = np.sum(scores_exp, axis=1).reshape(-1,1)
+    possibilities = scores_exp/exp_sum
+    y_pred=np.argmax(possibilities, axis=1)
     pass
     ###########################################################################
     #                              END OF YOUR CODE                           #
