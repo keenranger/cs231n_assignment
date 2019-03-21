@@ -25,6 +25,8 @@ def affine_forward(x, w, b):
     # TODO: Implement the affine forward pass. Store the result in out. You   #
     # will need to reshape the input into rows.                               #
     ###########################################################################
+    num_inputs = x.shape[0]
+    out = np.matmul(x.reshape(num_inputs, -1), w) + b
     pass
     ###########################################################################
     #                             END OF YOUR CODE                            #
@@ -53,6 +55,10 @@ def affine_backward(dout, cache):
     ###########################################################################
     # TODO: Implement the affine backward pass.                               #
     ###########################################################################
+    dx = np.matmul(dout, w.T).reshape(x.shape)
+    dw = np.matmul(x.reshape(x.shape[0], -1).T, dout)
+    db = np.sum(dout, axis=0)
+
     pass
     ###########################################################################
     #                             END OF YOUR CODE                            #
@@ -75,6 +81,8 @@ def relu_forward(x):
     ###########################################################################
     # TODO: Implement the ReLU forward pass.                                  #
     ###########################################################################
+    out = x
+    out[x<0] = 0
     pass
     ###########################################################################
     #                             END OF YOUR CODE                            #
@@ -98,6 +106,8 @@ def relu_backward(dout, cache):
     ###########################################################################
     # TODO: Implement the ReLU backward pass.                                 #
     ###########################################################################
+    dx = np.copy(dout)
+    dx[x<=0]=0
     pass
     ###########################################################################
     #                             END OF YOUR CODE                            #

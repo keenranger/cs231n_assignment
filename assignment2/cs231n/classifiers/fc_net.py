@@ -47,6 +47,7 @@ class TwoLayerNet(object):
         # weights and biases using the keys 'W1' and 'b1' and second layer weights #
         # and biases using the keys 'W2' and 'b2'.                                 #
         ############################################################################
+        #self.parms[W1] = np.random
         pass
         ############################################################################
         #                             END OF YOUR CODE                             #
