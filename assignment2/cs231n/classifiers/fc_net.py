@@ -47,7 +47,10 @@ class TwoLayerNet(object):
         # weights and biases using the keys 'W1' and 'b1' and second layer weights #
         # and biases using the keys 'W2' and 'b2'.                                 #
         ############################################################################
-        #self.parms[W1] = np.random
+        self.params['W1'] = np.random.randn(input_dim, hidden_dim) * weight_scale
+        self.params['b1'] = np.zeros(input_dim)
+        self.params['W2'] = np.random.randn(hidden_dim, num_classes) * weight_scale
+        self.params['b2'] = np.zeros(hidden_dim)
         pass
         ############################################################################
         #                             END OF YOUR CODE                             #
@@ -78,6 +81,13 @@ class TwoLayerNet(object):
         # TODO: Implement the forward pass for the two-layer net, computing the    #
         # class scores for X and storing them in the scores variable.              #
         ############################################################################
+        W1 = self.params['W1']
+        b1 = self.params['b1']
+        W2 = self.params['W2']
+        b2 = self.params['b2']
+        layer1_relu, layer1_relu_cache = affine_relu_forward(X, W1, b1)
+        layer2, layer2_cache = affine_forward(layer1_relu, W2, b2)
+        scores = layer2
         pass
         ############################################################################
         #                             END OF YOUR CODE                             #
@@ -98,6 +108,12 @@ class TwoLayerNet(object):
         # automated tests, make sure that your L2 regularization includes a factor #
         # of 0.5 to simplify the expression for the gradient.                      #
         ############################################################################
+        loss, dx = softmax_loss(layer2, y)
+        dx, grads['W2'], grads['b2'] = affine_backward(dx, layer2_cache)
+        dx, grads['W1'], grads['b1'] = affine_relu_backward(dx, layer1_relu_cache)
+        grads['W2'] += self.reg * W2
+        grads['W1'] += self.reg * W1
+        loss += 0.5 * self.reg * (np.sum(np.power(W1, 2)) + np.sum(np.power(W2, 2)))
         pass
         ############################################################################
         #                             END OF YOUR CODE                             #
